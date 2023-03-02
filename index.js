@@ -3,7 +3,10 @@ const inquirer = require('inquirer');
 const Manager = require('./lib/Manager');
 const Engineer = require('./lib/Engineer');
 const Intern = require('./lib/Intern');
-function generateTeamMembersHTML() {
+
+const teamMembers = [];
+
+function generateTeamMembersHTML(teamMembers) {
   // Loop through the teamMembers array and generate HTML for each member
   const memberHTML = teamMembers.map(member => {
     let additionalInfo = "";
@@ -35,35 +38,124 @@ function generateTeamMembersHTML() {
 
   // Generate the entire HTML document
   const html = `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Team Profile</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-      </head>
-      <body>
-        <header>
-          <nav class="navbar navbar-dark bg-dark">
-            <span class="navbar-brand mb-0 h1">Team Profile</span>
-          </nav>
-        </header>
-        <main>
-          <div class="container">
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-              ${memberHTML}
-            </div>
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Team Profile</title>
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    </head>
+    <body>
+      <header>
+        <nav class="navbar navbar-dark bg-dark">
+          <span class="navbar-brand mb-0 h1">Team Profile</span>
+        </nav>
+      </header>
+      <main>
+        <div class="container">
+          <div class="row row-cols-1 row-cols-md-3 g-4">
+            ${memberHTML}
           </div>
-        </main>
-      </body>
-    </html>
-  `;
+        </div>
+      </main>
+    </body>
+  </html>
+`;
 
+return html;
+}
 // prompts
-function promptUser() {
-const teamMembers = [];
+async function promptUser() {
+    const teamMembers = [];
+    
+    function promptToAddEmployee() {
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employeeType',
+          message: 'Which type of employee would you like to add?',
+          choices: [
+            'Engineer',
+            'Intern',
+            'I am done adding employees'
+          ]
+        }
+      ]).then((answers) => {
+        switch (answers.employeeType) {
+          case 'Engineer':
+            addEngineer();
+            break;
+          case 'Intern':
+            addIntern();
+            break;
+          case 'I am done adding employees':
+            // Generate HTML and exit
+            break;
+          default:
+            // Handle invalid input
+        }
+      });
+    }  
+    function addEngineer() {
+    inquirer.prompt([  
+    {
+      type: 'input',
+      name: 'name',
+      message: 'What is the Engineer\'s name?'
+    },
+    {
+      type: 'input',
+      name: 'id',
+      message: 'What is the Engineer\'s employee ID?'
+    },
+    {
+      type: 'input',
+      name: 'email',
+      message: 'What is the Engineer\'s email address?'
+    },
+    {
+      type: 'input',
+      name: 'github',
+      message: 'What is the Engineer\'s github username?'
+    }
+  ]).then((answers) => {
+    const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github);
+    teamMembers.push(engineer);
+     // Prompt the user to add another employee
+     promptToAddEmployee();
+    });
+  }
+  function addIntern() {
+  inquirer.prompt([  
+    {
+      type: 'input',
+      name: 'name',
+      message: 'What is the intern\'s name?'
+    },
+    {
+      type: 'input',
+      name: 'id',
+      message: 'What is the intern\'s employee ID?'
+    },
+    {
+      type: 'input',
+      name: 'email',
+      message: 'What is the intern\'s email address?'
+    },
+    {
+      type: 'input',
+      name: 'school',
+      message: 'What school did the intern attend?'
+    }
+  ]).then((answers) => {
+    const intern = new Intern(answers.name, answers.id, answers.email, answers.school);
+    teamMembers.push(intern);
+     // Prompt the user to add another employee
+     promptToAddEmployee();
+    });
+  }
 
 // Prompt the user for manager information
 inquirer.prompt([
@@ -90,120 +182,39 @@ inquirer.prompt([
 ]).then((answers) => {
   const manager = new Manager(answers.name, answers.id, answers.email, answers.officeNumber);
   teamMembers.push(manager);
-  // Return to the menu to add another employee or finish building the team
-   // Prompt the user to add another employee
-   promptToAddEmployee();
-  });
-  
-  function promptToAddEmployee() {
-    inquirer.prompt([
-      {
-        type: 'list',
-        name: 'employeeType',
-        message: 'Which type of employee would you like to add?',
-        choices: [
-          'Engineer',
-          'Intern',
-          'I am done adding employees'
-        ]
-      }
-    ]).then((answers) => {
-      switch (answers.employeeType) {
-        case 'Engineer':
-          addEngineer();
-          break;
-        case 'Intern':
-          addIntern();
-          break;
-        case 'I am done adding employees':
-          // Generate HTML and exit
-          break;
-        default:
-          // Handle invalid input
-      }
-    });
-  }  
-  function addEngineer() {
-  inquirer.prompt([  
-  {
-    type: 'input',
-    name: 'name',
-    message: 'What is the Engineer\'s name?'
-  },
-  {
-    type: 'input',
-    name: 'id',
-    message: 'What is the Engineer\'s employee ID?'
-  },
-  {
-    type: 'input',
-    name: 'email',
-    message: 'What is the Engineer\'s email address?'
-  },
-  {
-    type: 'input',
-    name: 'github',
-    message: 'What is the Engineer\'s github username?'
-  }
-]).then((answers) => {
-  const engineer = new Engineer(answers.name, answers.id, answers.email, answers.github);
-  teamMembers.push(engineer);
-   // Prompt the user to add another employee
-   promptToAddEmployee();
-  });
-}
-function addIntern() {
-inquirer.prompt([  
-  {
-    type: 'input',
-    name: 'name',
-    message: 'What is the intern\'s name?'
-  },
-  {
-    type: 'input',
-    name: 'id',
-    message: 'What is the intern\'s employee ID?'
-  },
-  {
-    type: 'input',
-    name: 'email',
-    message: 'What is the intern\'s email address?'
-  },
-  {
-    type: 'input',
-    name: 'school',
-    message: 'What school did the intern attend?'
-  }
-]).then((answers) => {
-  const intern = new Intern(answers.name, answers.id, answers.email, answers.school);
-  teamMembers.push(intern);
-   // Prompt the user to add another employee
-   promptToAddEmployee();
-  });
-}}
-
-  // Write the HTML to a file named "team.html"
-  fs.writeFile("team.html", html, (err) => {
-    if (err) throw err;
-    console.log("The team.html file has been created successfully!");
-  });
-}
-  
-  // Function to initialize the app
-  async function init() {
-    try {
-      // Prompt the user for information
-      const answers = await promptUser();
-  
-      // Generate the HTML based on the user's answers
-      const htmlContent = generateTeamMembersHTML(answers);
-  
-     // Write the HTML file
-    writeToFile('team.html', htmlContent);
-    } catch (error) {
-      console.log(error);
+  // Prompt the user to add an employee
+  promptToAddEmployee();
+});
+ // Return the teamMembers array when all prompts are done
+ return new Promise((resolve) => {
+  const interval = setInterval(() => {
+    if (teamMembers.length > 0) {
+      clearInterval(interval);
+      resolve(teamMembers);
     }
+  }, 100);
+});
+}
+
+async function init() {
+  try {
+    // Prompt the user for information
+    const teamMembers = await promptUser();
+
+    // Generate the HTML based on the user's answers
+    const htmlContent = generateTeamMembersHTML(teamMembers);
+
+    // Write the HTML file
+    fs.writeFile("team.html", htmlContent, (err) => {
+      if (err) throw err;
+      console.log("The team.html file has been created successfully!");
+    });
+
+    console.log("The team.html file has been created successfully!");
+  } catch (error) {
+    console.log(error);
   }
-  
-  // Call the init function to initialize the app
+}
+
+// Call the init function to initialize the app
   init();
